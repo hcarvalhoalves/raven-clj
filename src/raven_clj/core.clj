@@ -15,19 +15,21 @@
   (format "%s/api/%s/store/"
           uri project-id))
 
-(defn make-sentry-header [ts key secret]
-  (format "Sentry sentry_version=2.0, sentry_client=raven-clj/0.6.0, sentry_timestamp=%s, sentry_key=%s, sentry_secret=%s"
-          ts key secret))
+(defn make-sentry-header [timestamp key secret]
+  (format "Sentry sentry_version=7, sentry_timestamp=%s, sentry_key=%s, sentry_secret=%s"
+          raven-clj-version timestamp key secret))
 
-(defn send-packet [{:keys [ts uri project-id key secret] :as packet-info}]
+(defn send-packet [{:keys [timestamp uri project-id key secret] :as packet-info}]
   (let [url (make-sentry-url uri project-id)
-        header (make-sentry-header ts key secret)]
+        header (make-sentry-header timestamp key secret)
+        data (dissoc packet-info :uri :project-id :key :secret)]
     (http/post url
                {:insecure? true
                 :throw-exceptions false
                 :headers {"X-Sentry-Auth" header
-                          "User-Agent" "raven-clj/0.6.0"}
-                :body (json/generate-string packet-info)})))
+                          "User-Agent" raven-clj-version
+                          "Content-Type" "application/json"}
+                :body (json/generate-string data)})))
 
 (defn parse-dsn [dsn]
   (let [[proto-auth url] (string/split dsn #"@")
@@ -46,9 +48,9 @@
   keys found at http://sentry.readthedocs.org/en/latest/developer/client/index.html#building-the-json-packet"
   (send-packet
    (merge (parse-dsn dsn)
-          {:level "error"
-           :platform "clojure"
+          {:platform "clojure"
            :server_name (.getHostName (InetAddress/getLocalHost))
-           :ts (str (Timestamp. (.getTime (Date.))))}
+           :timestamp (str (Timestamp. (.getTime (Date.))))}
           event-info
           {:event_id (generate-uuid)})))
+
