@@ -1,6 +1,6 @@
-(defproject raven-clj "1.3.1"
-  :description "Sentry clojure client"
-  :url "http://github.com/sethtrain/raven-clj"
+(defproject com.emidln/raven-clj "1.4.0"
+  :description "Fork of Sentry clojure client"
+  :url "http://github.com/emidln/raven-clj"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[cheshire "5.0.1"]

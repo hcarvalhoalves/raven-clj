@@ -6,7 +6,9 @@
            [java.sql Timestamp]
            [java.net InetAddress]))
 
-(defn- generate-uuid []
+(def raven-clj-version "com.emidln/raven-clj/1.4.0")
+
+(defn generate-uuid []
   (string/replace (UUID/randomUUID) #"-" ""))
 
 (defn make-sentry-url [uri project-id]
