@@ -1,11 +1,11 @@
 # raven-clj
 
-A Clojure interface to Sentry.
+Fork of A Clojure interface to Sentry.
 
 ## Usage
 
 ```clojure
-[raven-clj "1.3.1"]
+[com.emidln/raven-clj "1.4.0"]
 ```
 
 ### `capture`
