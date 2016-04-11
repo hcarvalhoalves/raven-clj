@@ -6,7 +6,7 @@
            [java.sql Timestamp]
            [java.net InetAddress]))
 
-(def raven-clj-version "com.emidln/raven-clj/1.4.0")
+(def raven-clj-version "hcarvalhoalves/raven-clj/1.4.0")
 
 (defn generate-uuid []
   (string/replace (UUID/randomUUID) #"-" ""))
@@ -16,7 +16,7 @@
           uri project-id))
 
 (defn make-sentry-header [timestamp key secret]
-  (format "Sentry sentry_version=7, sentry_timestamp=%s, sentry_key=%s, sentry_secret=%s"
+  (format "Sentry sentry_version=7, sentry_client=%s, sentry_timestamp=%s, sentry_key=%s, sentry_secret=%s"
           raven-clj-version timestamp key secret))
 
 (defn send-packet [{:keys [timestamp uri project-id key secret] :as packet-info}]
