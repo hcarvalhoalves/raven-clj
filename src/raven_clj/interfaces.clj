@@ -1,33 +1,35 @@
-(ns raven-clj.interfaces)
+(ns raven-clj.interfaces
+  (:require [prone.stacks :as stacks]
+            [clojure.java.io :as io]
+            [clojure.string :as str]
+            [clojure.repl :as repl]))
 
-(defn- make-http-info [req]
-  {:url (str (name (:scheme req))
-             "://"
-             (:server-name req)
-             (if (not= 80 (:server-port req))
-               (str ":" (:server-port req)))
-             (:uri req))
-   :method (:method req)
-   :headers (get req :headers {})
-   :query_string (get req :query-string "")
-   :data (get req :params {})
-   :env {:session (get req :session {})}})
+(defn in-app [package app-namespaces]
+  (boolean (some #(.startsWith package %) app-namespaces)))
 
-(defn http [event-map req alter-fn]
-  (assoc event-map "sentry.interfaces.Http"
-         (alter-fn (make-http-info req))))
+(defn file->source [file-path line-number]
+  (some-> (io/resource file-path)
+          slurp
+          (str/split #"\n")
+          (#(drop (- line-number 6) %))
+          (#(take 11 %))))
 
-(defn- make-frame [^StackTraceElement element app-namespaces]
-  {:filename (.getFileName element)
-   :lineno (.getLineNumber element)
-   :function (str (.getClassName element) "." (.getMethodName element))
-   :in_app (boolean (some #(.startsWith (.getClassName element) %) app-namespaces))})
-
-(defn- make-stacktrace-info [elements app-namespaces]
-  {:frames (reverse (map #(make-frame % app-namespaces) elements))})
+(defn frame->sentry [app-namespaces frame]
+  (let [source (file->source (:class-path-url frame) (:line-number frame))]
+    {:filename     (:file-name frame)
+     :lineno       (:line-number frame)
+     :function     (str (:package frame) "/" (:method-name frame))
+     :in_app       (in-app (:package frame) app-namespaces)
+     :context_line (some-> source (nth 5 nil))
+     :pre_context  (some->> source (take 5))
+     :post_context (some->> source (drop 6))}))
 
 (defn stacktrace [event-map ^Exception e & [app-namespaces]]
-  (assoc event-map
-    :exception [{:stacktrace (make-stacktrace-info (.getStackTrace e) app-namespaces)
-                 :type (str (class e))
-                 :value (.getMessage e)}]))
+  (let [stacks (stacks/normalize-exception (repl/root-cause e))
+        frames (map (partial frame->sentry app-namespaces)
+                    (reverse (:frames stacks)))]
+    (-> {:message   (.getMessage e)
+         :exception [{:value      (:message stacks)
+                      :type       (:type stacks)
+                      :stacktrace {:frames frames}}]}
+        (merge event-map))))
