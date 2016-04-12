@@ -5,7 +5,7 @@ Fork of A Clojure interface to Sentry.
 ## Usage
 
 ```clojure
-[raven-clj "1.4.0"]
+[org.clojars.hcarvalhoalves/raven-clj "1.5.0"]
 ```
 
 ### `capture`
