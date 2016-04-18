@@ -4,7 +4,9 @@
             [clojure.string :as string])
   (:import [java.util Date UUID]
            [java.sql Timestamp]
-           [java.net InetAddress]))
+           [java.time ZonedDateTime]
+           [java.net InetAddress]
+           (java.time.format DateTimeFormatter)))
 
 (def raven-clj-version "raven-clj/1.5.0")
 
@@ -32,13 +34,14 @@
   (let [url    (make-sentry-url uri project-id)
         header (make-sentry-header timestamp key secret)
         data   (dissoc packet-info :uri :project-id :key :secret)]
-    (http/post url
-               {:insecure?        true
-                :throw-exceptions false
-                :headers          {"X-Sentry-Auth" header
-                                   "User-Agent"    raven-clj-version
-                                   "Content-Type"  "application/json"}
-                :body             (json/generate-string data)})))
+    (future
+      (http/post url
+                 {:insecure?        true
+                  :throw-exceptions false
+                  :headers          {"X-Sentry-Auth" header
+                                     "User-Agent"    raven-clj-version
+                                     "Content-Type"  "application/json"}
+                  :body             (json/generate-string data)}))))
 
 
 
@@ -49,7 +52,7 @@
   (.getHostName (InetAddress/getLocalHost)))
 
 (defn get-timestamp []
-  (str (Timestamp. (.getTime (Date.)))))
+  (str (.format (ZonedDateTime/now) (DateTimeFormatter/ISO_INSTANT))))
 
 (defn capture [dsn event-info]
   "Send a message to a Sentry server.

@@ -54,10 +54,10 @@
 
 (facts "on capture"
   (facts "with a valid dsn"
-    (fact "should set :platform in event-info to clojure"
-      (c/capture example-dsn {}) => irrelevant
+    (fact "should append event_id, timestamp, server_name and platform to event info"
+      (deref (c/capture example-dsn {})) => {:status 200}
       (provided
-        (c/get-timestamp) => "2042-01-01 00:00:00.000"
+        (c/get-timestamp) => "2042-01-01T00:00:00.000.000Z"
         (c/get-hostname) => "example.com"
         (c/generate-uuid) => "00000000000000000000000000000000"
         (c/send-packet {:key         "b70a31b3510c4cf793964a185cfe1fd0"
@@ -66,5 +66,5 @@
                         :project-id  1
                         :platform    "clojure"
                         :server_name "example.com"
-                        :timestamp   "2042-01-01 00:00:00.000"
-                        :event_id    "00000000000000000000000000000000"}) => irrelevant))))
+                        :timestamp   "2042-01-01T00:00:00.000.000Z"
+                        :event_id    "00000000000000000000000000000000"}) => (future {:status 200})))))
