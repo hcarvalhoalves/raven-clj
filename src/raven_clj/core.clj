@@ -2,8 +2,7 @@
   (:require [cheshire.core :as json]
             [clj-http.client :as http]
             [clojure.string :as string])
-  (:import [java.util Date UUID]
-           [java.sql Timestamp]
+  (:import [java.util UUID]
            [java.time ZonedDateTime]
            [java.net InetAddress]
            (java.time.format DateTimeFormatter)))
@@ -37,7 +36,7 @@
     (future
       (http/post url
                  {:insecure?        true
-                  :throw-exceptions false
+                  :throw-exceptions true
                   :headers          {"X-Sentry-Auth" header
                                      "User-Agent"    raven-clj-version
                                      "Content-Type"  "application/json"}

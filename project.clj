@@ -1,4 +1,4 @@
-(defproject org.clojars.hcarvalhoalves/raven-clj "1.7.0"
+(defproject org.clojars.hcarvalhoalves/raven-clj "1.7.1"
   :description "Fork of Sentry clojure client"
   :url "http://github.com/hcarvalhoalves/raven-clj"
   :license {:name "Eclipse Public License"
