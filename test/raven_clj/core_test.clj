@@ -3,7 +3,8 @@
             [raven-clj.core :as c])
   (:import [java.sql Timestamp]
            [java.util Date]
-           (java.util.concurrent ExecutionException)))
+           (java.util.concurrent ExecutionException)
+           (clojure.lang ExceptionInfo)))
 
 (def example-dsn
   (str "https://"
@@ -73,8 +74,8 @@
        (facts "on status code > 299"
               (fact "should bubble up exception"
                     (try
-                      (deref (c/capture example-dsn {}))
+                      (c/capture example-dsn {})
                       (catch Exception e
-                        (type e))) => ExecutionException
+                        (type e))) => ExceptionInfo
                     (provided
                       (#'clj-http.core/request anything) => {:status 500}))))

@@ -33,14 +33,13 @@
   (let [url    (make-sentry-url uri project-id)
         header (make-sentry-header timestamp key secret)
         data   (dissoc packet-info :uri :project-id :key :secret)]
-    (future
-      (http/post url
-                 {:insecure?        true
-                  :throw-exceptions true
-                  :headers          {"X-Sentry-Auth" header
-                                     "User-Agent"    raven-clj-version
-                                     "Content-Type"  "application/json"}
-                  :body             (json/generate-string data)}))))
+    (http/post url
+               {:insecure?        true
+                :throw-exceptions true
+                :headers          {"X-Sentry-Auth" header
+                                   "User-Agent"    raven-clj-version
+                                   "Content-Type"  "application/json"}
+                :body             (json/generate-string data)})))
 
 
 
